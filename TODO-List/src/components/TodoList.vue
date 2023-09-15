@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 const todo = ref('')
 const todoList = ref([])
+const filter = ref(false)
 
 function addTodo() {
     if(todo.value.trim() === ''){
@@ -21,6 +22,9 @@ function deleteTodo(id){
     todoList.value = todoList.value.filter(todo => todo.id !== id)
 }
 
+function activeFilter(){
+    filter.value = !filter.value
+}
 
 onBeforeMount(() => {
     const todos = localStorage.getItem('todoList') || []
@@ -37,16 +41,28 @@ watch(todoList, (newValue) =>{
 
 <template>
     <div class="todolist_wrapper">
-        <form @submit.prevent="addTodo">
-            <input type="text" v-model="todo" placeholder="Add a new todo">
-            <button type="submit">Add</button>
-        </form>
+        <div class="btn_wrapper">
+            <form @submit.prevent="addTodo">
+                <input type="text" v-model="todo" placeholder="Add a new todo">
+                <button type="submit">Add</button>
+            </form>
+            <img @click="activeFilter" src="../assets/img/filter-solid.svg" alt="filter icon" class="todo_filter">
+        </div>
+
     
         
-        <div v-for="todo in todoList" class="todo_wrapper">
-            <img @click="deleteTodo(todo.id)" src="../assets/img/trash-can-solid.svg" alt="trash icon" class="todo_trashIcon">
-            <input type="checkbox" v-model="todo.completed" class="todo_checkbox">
-            <input type="text" v-model="todo.title" :class="`todo_title ${todo.completed ? 'completed': ''}`">
+        <div v-for="todo in todoList" :key="todo.id">
+            <div v-if="filter && todo.completed" class="todo_wrapper">
+                <img @click="deleteTodo(todo.id)" src="../assets/img/trash-can-solid.svg" alt="trash icon" class="todo_trashIcon">
+                <input type="checkbox" v-model="todo.completed" class="todo_checkbox">
+                <input type="text" v-model="todo.title" :class="`todo_title ${todo.completed ? 'completed': ''}`">
+            </div>
+            <div v-else-if="!filter" class="todo_wrapper">
+                <img @click="deleteTodo(todo.id)" src="../assets/img/trash-can-solid.svg" alt="trash icon" class="todo_trashIcon">
+                <input type="checkbox" v-model="todo.completed" class="todo_checkbox">
+                <input type="text" v-model="todo.title" :class="`todo_title ${todo.completed ? 'completed': ''}`">
+            </div>
+
         </div>
     </div>
 </template>
@@ -58,6 +74,13 @@ watch(todoList, (newValue) =>{
 
 
 .todolist_wrapper{
+    width: 100%;
+}
+
+.btn_wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     width: 100%;
 }
 
@@ -93,6 +116,12 @@ form{
         cursor: pointer;
     }
 
+}
+
+.todo_filter{
+    width: 46px;
+    cursor: pointer;
+    margin-left: 20px;
 }
 
 .todo_wrapper{
